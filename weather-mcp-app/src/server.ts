@@ -126,7 +126,7 @@ function createMcpServer() {
     // ⚡ Handler que lee y devuelve el HTML
     async () => {
       const html = await fs.readFile(
-        path.join(import.meta.dirname, "dist", "src", "apps", "weather-app", "index.html"),
+        path.join(import.meta.dirname, "..", "dist", "src", "apps", "weather-app", "index.html"),
         "utf-8",
       );
       return {
