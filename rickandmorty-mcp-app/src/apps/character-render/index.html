@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Character card</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Personaje de Rick and Morty</h1>
+      <a id="character-link" href="#" target="_blank" class="character-card">
+        <div class="card-image">
+          <img id="character-image" src="" alt="Character image" />
+        </div>
+        <div class="card-content">
+          <div class="card-header">
+            <h2 id="character-name" class="character-name">Cargando...</h2>
+            <span id="character-status" class="character-status"></span>
+          </div>
+          <div class="character-details">
+            <div class="detail-item">
+              <span class="detail-label">Especie:</span>
+              <span id="character-species" class="detail-value">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Género:</span>
+              <span id="character-gender" class="detail-value">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Origen:</span>
+              <span id="character-origin" class="detail-value">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Ubicación:</span>
+              <span id="character-location" class="detail-value">-</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Episodios:</span>
+              <span id="character-episodes" class="detail-value">-</span>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+    <script type="module" src="./app.ts"></script>
+  </body>
+</html>
