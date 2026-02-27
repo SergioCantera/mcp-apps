@@ -9,7 +9,9 @@ for (let i = 0; i < entries.length; i++) {
 
   console.log(`[${i + 1}/${entries.length}] Building ${entry}...`);
 
-  execSync(`BUILD_ENTRY=${entry} npx vite build${isFirst ? "" : " --emptyOutDir false"}`, {
+  const command = `npx vite build${isFirst ? "" : " --emptyOutDir false"}`;
+
+  execSync(command, {
     stdio: "inherit",
     env: { ...process.env, BUILD_ENTRY: entry },
   });
