@@ -1,30 +1,30 @@
 
-// 🎬 app.ts - Cliente MCP App para renderizar tarjetas de personajes de Rick and Morty
+// 🎬 app.ts - MCP Client App for rendering Rick and Morty character cards
 
 import { App } from "@modelcontextprotocol/ext-apps";
 
-// ⚙️ Creamos la instancia de la app MCP
+// ⚙️ Create the MCP app instance
 const app = new App({ name: "Rick and Morty character", version: "1.0.0" });
 
-// 🔌 Establecemos comunicación con el host (VS Code, etc.)
+// 🔌 Establish communication with the host (VS Code, etc.)
 app.connect();
 
 let currentCharacterUrl = "";
 
-// 📥 Handler que recibe el resultado de la herramienta desde el host
+// 📥 Handler that receives the tool result from the host
 app.ontoolresult = (result) => {
-    // 📝 Extraemos el texto del contenido
+    // 📝 Extract the text from the content
     const rawText = result.content?.find((c) => c.type === "text")?.text ?? "";
     
     try {
-        // 🔄 Parseamos el JSON con los datos del personaje
+        // 🔄 Parse the JSON with the character data
         const { id, name, image, url, status, species, gender, origin, location, episode } = JSON.parse(rawText);
         
         if (id) {
-            // 🔗 Construimos la URL del personaje
+            // 🔗 Construct the character URL
             currentCharacterUrl = url || `https://rickandmortyapi.com/api/character/${id}`;
             
-            // 🔗 Actualizamos el enlace del personaje
+            // 🔗 Update the character link
             const characterLinkEl = document.getElementById("character-link") as HTMLAnchorElement;
             if (characterLinkEl) {
                 characterLinkEl.href = currentCharacterUrl;
@@ -32,7 +32,7 @@ app.ontoolresult = (result) => {
         }
 
         if (name) {
-            // 📝 Actualizamos el nombre del personaje
+            // 📝 Update the character name
             const characterNameEl = document.getElementById("character-name");
             if (characterNameEl) {
                 characterNameEl.textContent = name;
@@ -40,7 +40,7 @@ app.ontoolresult = (result) => {
         }
 
         if (status) {
-            // 🔴 Actualizamos el estado
+            // 🔴 Update the status
             const statusEl = document.getElementById("character-status") as HTMLElement;
             if (statusEl) {
                 statusEl.textContent = status;
@@ -49,7 +49,7 @@ app.ontoolresult = (result) => {
         }
 
         if (species) {
-            // 👽 Actualizamos la especie
+            // 👽 Update the species
             const speciesEl = document.getElementById("character-species");
             if (speciesEl) {
                 speciesEl.textContent = species;
@@ -57,7 +57,7 @@ app.ontoolresult = (result) => {
         }
 
         if (gender) {
-            // ⚧ Actualizamos el género
+            // ⚧ Update the gender
             const genderEl = document.getElementById("character-gender");
             if (genderEl) {
                 genderEl.textContent = gender;
@@ -65,7 +65,7 @@ app.ontoolresult = (result) => {
         }
 
         if (origin) {
-            // 🌍 Actualizamos el origen
+            // 🌍 Update the origin
             const originEl = document.getElementById("character-origin");
             if (originEl) {
                 originEl.textContent = origin.name || "-";
@@ -73,7 +73,7 @@ app.ontoolresult = (result) => {
         }
 
         if (location) {
-            // 📍 Actualizamos la ubicación
+            // 📍 Update the location
             const locationEl = document.getElementById("character-location");
             if (locationEl) {
                 locationEl.textContent = location.name || "-";
@@ -81,20 +81,20 @@ app.ontoolresult = (result) => {
         }
 
         if (image) {
-            // 🖼️ Actualizamos la imagen (ahora es un data URL en base64)
+            // 🖼️ Update the image (now it's a base64 data URL)
             const imageEl = document.getElementById("character-image") as HTMLImageElement;
             if (imageEl) {
-                // Usamos directamente el base64, sin necesidad de proxy
+                // Use the base64 directly, no need for a proxy
                 imageEl.src = image;
                 imageEl.alt = name || "Character";
             }
         }
 
         if (episode && Array.isArray(episode)) {
-            // 📺 Actualizamos el número de episodios
+            // 📺 Update the number of episodes
             const episodesEl = document.getElementById("character-episodes");
             if (episodesEl) {
-                episodesEl.textContent = `${episode.length} episodios`;
+                episodesEl.textContent = `${episode.length} episodes`;
             }
         }
 

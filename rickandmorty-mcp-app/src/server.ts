@@ -1,28 +1,28 @@
-// 🚀 src/server.ts - Servidor MCP con herramientas de https://rickandmortyapi.com/api
+// 🚀 src/server.ts - MCP Server with tools for https://rickandmortyapi.com/api
 
 
 console.log("Starting MCP App server...");
 
-// 📦 Importaciones del SDK de MCP
+// 📦 MCP SDK imports
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from 'zod'; // 📋 Zod para validar los parámetros de entrada
 import { searchCharacter } from './services/rickandmorty.js';
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 
-// 🎨 Importaciones para MCP Apps (herramientas con UI)
+// 🎨 MCP Apps imports (tools with UI)
 import {
-  registerAppTool,    // 🔧 Registra una herramienta que tiene interfaz visual
-  registerAppResource, // 📄 Registra el HTML que se mostrará al usuario
-  RESOURCE_MIME_TYPE,  // 📝 Tipo MIME especial para recursos de MCP Apps
+  registerAppTool,    // 🔧 Register a tool with a visual interface
+  registerAppResource, // 📄 Register the HTML that will be shown to the user
+  RESOURCE_MIME_TYPE,  // 📝 Special MIME type for MCP App resources
 } from "@modelcontextprotocol/ext-apps/server";
 
-// 🌐 Importaciones para el servidor HTTP
+// 🌐 HTTP server imports
 import cors from "cors";
 import express from "express";
 import fs from "node:fs/promises";
 import path from "node:path";
 
-// 🎨 Helper para convertir imagen a base64
+// 🎨 Helper to convert image to base64
 async function imageUrlToBase64(imageUrl: string): Promise<string | null> {
   try {
     const response = await fetch(imageUrl);
@@ -40,7 +40,7 @@ async function imageUrlToBase64(imageUrl: string): Promise<string | null> {
 }
 
 function createMcpServer() {
-  // ⚙️ Creamos la instancia del servidor MCP
+  // ⚙️ Create the MCP server instance
   const server = new McpServer(
     {
       name: "Rick&Morty MCP Server",
@@ -48,50 +48,50 @@ function createMcpServer() {
     }
 );
 
-  // 🔗 URIs de los recursos UI - El esquema ui:// indica al host que es un recurso de MCP App
-  // La estructura del path es arbitraria, organízala como tenga sentido para tu app
+  // 🔗 UI resource URIs - The ui:// scheme indicates to the host that it's an MCP App resource
+  // The path structure is arbitrary, organize it as it makes sense for your app
   const characterResourceUri = "ui://get-character/character-render.html";
 
   // ============================================================================
-  // 🎬 HERRAMIENTA: get-character
-  // Busca un personaje en Rick and Morty y muestra una tarjeta con su información
+  // 🎬 TOOL: get-character
+  // Searches for a character in Rick and Morty and displays a card with its information
   // ============================================================================
 
-  // 🔧 Registramos la herramienta con UI asociada
+  // 🔧 Register the tool with its associated UI
   registerAppTool(
     server,
-    "get-character", // 📛 Nombre único de la herramienta
+    "get-character", // 📛 Unique name of the tool
     {
-      title: "Search character in Rick and Morty API", // 🏷️ Título que verá el usuario
+      title: "Search character in Rick and Morty API", // 🏷️ Title visible to the user
       description: "Searches for a character in Rick and Morty and returns its information.",
-      // 📋 Esquema de entrada validado con Zod
+      // 📋 Input schema validated with Zod
       inputSchema: z.object({
         name: z.string().describe("Name of the character to search for"),
       }),
-      // 🎨 Metadatos que vinculan esta herramienta con su recurso UI
+      // 🎨 Metadata linking this tool to its UI resource
       _meta: { ui: { resourceUri: characterResourceUri } },
     },
-    // ⚡ Handler que se ejecuta cuando se invoca la herramienta
+    // ⚡ Handler executed when the tool is invoked
     async ({ name }) => {
       const character = await searchCharacter(name);
       
-      // ❌ Si no se encuentra el personaje, devolvemos error
+      // ❌ If the character is not found, return an error
       if (!character) {
         return {
           content: [{ type: "text", text: JSON.stringify({ error: "No character found" }) }],
         };
       }
       
-      // 🖼️ Convertimos la imagen a base64
+      // 🖼️ Convert the image to base64
       const imageBase64 = character.image ? await imageUrlToBase64(character.image) : null;
       
-      // ✅ Devolvemos los datos del personaje como JSON
-      // El HTML del recurso UI recibirá estos datos para renderizarlos
+      // ✅ Return the character data as JSON
+      // The HTML of the UI resource will receive this data to render it
       return {
         content: [{ type: "text", text: JSON.stringify({
           characterId: character.id,
           name: character.name,
-          image: imageBase64,  // 🖼️ Imagen como data URL en base64
+          image: imageBase64,  // 🖼️ Image as a base64 data URL
           status: character.status,
           species: character.species,
           type: character.type,
@@ -106,13 +106,13 @@ function createMcpServer() {
     },
   );
 
-  // 📄 Registramos el recurso que sirve el HTML compilado para get-character
+  // 📄 Register the resource that serves the compiled HTML for get-character
   registerAppResource(
     server,
-    characterResourceUri, // 🔗 URI del recurso
-    characterResourceUri, // 📛 Nombre del recurso
-    { mimeType: RESOURCE_MIME_TYPE }, // 📝 Tipo MIME especial
-    // ⚡ Handler que lee y devuelve el HTML
+    characterResourceUri, // 🔗 URI of the resource
+    characterResourceUri, // 📛 Name of the resource
+    { mimeType: RESOURCE_MIME_TYPE }, // 📝 Special MIME type
+    // ⚡ Handler that reads and returns the HTML
     async () => {
       const html = await fs.readFile(
         path.join(import.meta.dirname, "..", "dist", "src", "apps", "character-render", "index.html"),
@@ -130,34 +130,34 @@ function createMcpServer() {
 
 
 // ============================================================================
-// 🌐 SERVIDOR HTTP
-// Exponemos el servidor MCP a través de HTTP con Express
+// 🌐 HTTP SERVER
+// Expose the MCP server via HTTP with Express
 // ============================================================================
 
 const expressApp = express();
-expressApp.use(cors());       // 🔓 Habilitamos CORS para peticiones cross-origin
-expressApp.use(express.json()); // 📝 Parseamos el body como JSON
+expressApp.use(cors());       // 🔓 Enable CORS for cross-origin requests
+expressApp.use(express.json()); // 📝 Parse the body as JSON
 
-//  Endpoint principal de MCP - todas las peticiones van aquí
+//  Main MCP endpoint - all requests go here
 expressApp.post("/mcp", async (req, res) => {
-  // 🚀 Creamos un transporte HTTP para esta petición
+  // 🚀 Create an HTTP transport for this request
   const transport = new StreamableHTTPServerTransport({
-    sessionIdGenerator: undefined, // Sin gestión de sesiones
-    enableJsonResponse: true,      // Respuestas en JSON
+    sessionIdGenerator: undefined, // No session management
+    enableJsonResponse: true,      // JSON responses
   });
   
-  // 🧹 Limpiamos el transporte cuando se cierre la conexión
+  // 🧹 Clean up the transport when the connection is closed
   res.on("close", () => transport.close());
   
-  // 🔌 Conectamos el servidor MCP al transporte
+  // 🔌 Connect the MCP server to the transport
   const server = createMcpServer()
   await server.connect(transport);
   
-  // ⚡ Procesamos la petición MCP
+  // ⚡ Process the MCP request
   await transport.handleRequest(req, res, req.body);
 });
 
-// 🎯 Arrancamos el servidor en el puerto 3001
+// 🎯 Start the server on port 3001
 expressApp.listen(3001, (err) => {
   if (err) {
     console.error("Error starting server:", err);

@@ -1,4 +1,4 @@
-// 🔐 Carga las variables de entorno desde .env (ej: API_BASE_URL)
+// 🔐 Load environment variables from .env (e.g., API_BASE_URL)
 import 'dotenv/config';
 
 const API_BASE_URL = process.env.API_BASE_URL || "https://rickandmortyapi.com/api";

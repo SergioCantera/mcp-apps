@@ -1,21 +1,21 @@
-// 🌤️ src/server.ts - Servidor MCP con herramientas del clima
+// 🌤️ src/server.ts - MCP Server with weather tools
 
 console.log("Starting Weather MCP App server...");
 
-// 📦 Importaciones del SDK de MCP
+// 📦 MCP SDK imports
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from 'zod'; // 📋 Zod para validar los parámetros de entrada
 import { createWeatherService, WeatherData } from "./services/weatherService.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 
-// 🎨 Importaciones para MCP Apps (herramientas con UI)
+// 🎨 MCP Apps imports (tools with UI)
 import {
-  registerAppTool,    // 🔧 Registra una herramienta que tiene interfaz visual
-  registerAppResource, // 📄 Registra el HTML que se mostrará al usuario
-  RESOURCE_MIME_TYPE,  // 📝 Tipo MIME especial para recursos de MCP Apps
+  registerAppTool,    // 🔧 Registers a tool with a visual interface
+  registerAppResource, // 📄 Registers the HTML to be displayed to the user
+  RESOURCE_MIME_TYPE,  // 📝 Special MIME type for MCP Apps resources
 } from "@modelcontextprotocol/ext-apps/server";
 
-// 🌐 Importaciones para el servidor HTTP
+// 🌐 HTTP server imports
 import cors from "cors";
 import express from "express";
 import fs from "node:fs/promises";
@@ -53,36 +53,36 @@ function formatWeatherResponse(weather: WeatherData): string {
 }
 
 function createMcpServer() {
-  // ⚙️ Creamos la instancia del servidor MCP
+  // ⚙️ Create MCP server instance
   const server = new McpServer({
     name: "Weather MCP Server",
     version: "1.0.0",
   });
 
-  // 🔗 URI del recurso UI
+  // 🔗 URI of the UI resource
   const weatherResourceUri = "ui://get-weather/weather-app.html";
 
   // ============================================================================
-  // 🎬 HERRAMIENTA: get-weather
-  // Obtiene información del clima para una ubicación
+  // 🎬 TOOL: get-weather
+  // Fetches weather information for a location
   // ============================================================================
 
-  // 🔧 Registramos la herramienta con UI asociada
+  // 🔧 Register the tool with associated UI
   (registerAppTool as any)(
     server,
-    "get_weather", // 📛 Nombre único de la herramienta
+    "get_weather", // 📛 Unique name of the tool
     {
-      title: "Get Weather", // 🏷️ Título que verá el usuario
+      title: "Get Weather", // 🏷️ Title visible to the user
       description: "Fetch current weather, forecast, or weather alerts for a location",
-      // 📋 Esquema de entrada validado con Zod
+      // 📋 Input schema validated with Zod
       inputSchema: z.object({
         location: z.string().describe("City name or location (e.g., 'New York', 'London', 'Tokyo')"),
         type: z.enum(["current", "forecast", "alerts"]).describe("Type of weather data to retrieve"),
       }),
-      // 🎨 Metadatos que vinculan esta herramienta con su recurso UI
+      // 🎨 Metadata linking this tool to its UI resource
       _meta: { ui: { resourceUri: weatherResourceUri } },
     },
-    // ⚡ Handler que se ejecuta cuando se invoca la herramienta
+    // ⚡ Handler executed when the tool is invoked
     async ({ location, type = "current" }: any) => {
       try {
         let result;
@@ -117,13 +117,13 @@ function createMcpServer() {
     },
   );
 
-  // 📄 Registramos el recurso que sirve el HTML compilado para get-weather
+  // 📄 Register the resource that serves the compiled HTML for get-weather
   registerAppResource(
     server,
-    weatherResourceUri, // 🔗 URI del recurso
-    weatherResourceUri, // 📛 Nombre del recurso
-    { mimeType: RESOURCE_MIME_TYPE }, // 📝 Tipo MIME especial
-    // ⚡ Handler que lee y devuelve el HTML
+    weatherResourceUri, // 🔗 URI of the resource
+    weatherResourceUri, // 📛 Name of the resource
+    { mimeType: RESOURCE_MIME_TYPE }, // 📝 Special MIME type
+    // ⚡ Handler that reads and returns the HTML
     async () => {
       const html = await fs.readFile(
         path.join(import.meta.dirname, "..", "dist", "src", "apps", "weather-app", "index.html"),
@@ -141,30 +141,30 @@ function createMcpServer() {
 }
 
 // ============================================================================
-// 🌐 SERVIDOR HTTP
-// Exponemos el servidor MCP a través de HTTP con Express
+// 🌐 HTTP SERVER
+// Expose the MCP server via HTTP using Express
 // ============================================================================
 
 const expressApp = express();
-expressApp.use(cors());       // 🔓 Habilitamos CORS para peticiones cross-origin
-expressApp.use(express.json()); // 📝 Parseamos el body como JSON
+expressApp.use(cors());       // 🔓 Enable CORS for cross-origin requests
+expressApp.use(express.json()); // 📝 Parse the body as JSON
 
-// 📡 Endpoint principal de MCP - todas las peticiones van aquí
+// 📡 Main MCP endpoint - all requests go here
 expressApp.post("/mcp", async (req, res) => {
-  // 🚀 Creamos un transporte HTTP para esta petición
+  // 🚀 Create an HTTP transport for this request
   const transport = new StreamableHTTPServerTransport({
-    sessionIdGenerator: undefined, // Sin gestión de sesiones
-    enableJsonResponse: true,      // Respuestas en JSON
+    sessionIdGenerator: undefined, // No session management
+    enableJsonResponse: true,      // JSON responses
   });
   
-  // 🧹 Limpiamos el transporte cuando se cierre la conexión
+  // 🧹 Clean up the transport when the connection is closed
   res.on("close", () => transport.close());
   
-  // 🔌 Conectamos el servidor MCP al transporte
+  // 🔌 Connect the MCP server to the transport
   const server = createMcpServer()
   await server.connect(transport);
   
-  // ⚡ Procesamos la petición MCP
+  // ⚡ Process the MCP request
   await transport.handleRequest(req, res, req.body);
 });
 
@@ -173,7 +173,7 @@ expressApp.get("/health", (req, res) => {
   res.json({ status: "ok", service: "weather-mcp" });
 });
 
-// 🎯 Arrancamos el servidor en el puerto 3001
+// 🎯 Start the server on port 3001
 const PORT = parseInt(process.env.PORT || "3002", 10);
 expressApp.listen(PORT, (err?: Error) => {
   if (err) {
